@@ -273,43 +273,57 @@ tr:hover td{background:rgba(13,79,46,.025)}
 
 /* === DESKTOP LAYOUT === */
 @media(min-width:768px){
-  body{
-    background:#2C2C2C;
-    display:flex;
-    justify-content:center;
-    min-height:100vh;
-  }
-  /* Conteneur central largeur fixe */
-  #root{
-    width:480px;
-    min-width:480px;
-    position:relative;
-  }
-  .page{
-    width:480px;
-    padding-left:14px;
-    padding-right:14px;
-  }
-  .topbar{
-    width:480px !important;
-    left:50% !important;
-    transform:translateX(-50%) !important;
-    border-radius:0 0 8px 8px;
-  }
-  .botnav{
-    width:480px !important;
-    left:50% !important;
-    transform:translateX(-50%) !important;
-    border-radius:8px 8px 0 0;
-  }
-  .more-menu{
-    width:480px !important;
-    left:50% !important;
-    transform:translateX(-50%) !important;
-  }
+  body{font-size:17px}
+  .page{max-width:1100px;margin:0 auto;padding-left:36px;padding-right:36px}
+  .topbar{padding:0 32px}
+  .app-name{font-size:17px}
+  .topbar{height:0;overflow:hidden;display:none}
+  .topbar-center{padding:0 24px}
+  .page{padding-top:8px}
+  .topbar-logo{width:60px;height:60px}
+  .yr-badge{font-size:13px;padding:5px 11px}
+  .topbar-title-fr{font-size:22px}
+  .topbar-title-ar{font-size:26px}
+
+  .lbtn{padding:8px 20px;font-size:14px}
+  .botnav{height:72px}
+  .bni{font-size:13px;padding:10px 2px 12px}
+  .bni-ic{font-size:26px}
+  .sg{grid-template-columns:repeat(4,1fr);gap:16px}
+  .sc{padding:20px 18px;gap:16px}
+  .sc-ic{font-size:30px;width:56px;height:56px;border-radius:14px}
+  .sc-v{font-size:32px}
+  .sc-l{font-size:13px}
+  .card{margin-bottom:20px;border-radius:14px}
+  .ch{padding:18px 20px}
+  .ct{font-size:19px}
+  th{padding:14px 18px;font-size:13px}
+  td{padding:16px 18px;font-size:16px}
+  .an{font-size:18px}
+  .ab{font-size:16px;padding:15px 4px}
+  .badge{font-size:13px;padding:5px 12px}
+  .btn{padding:14px 24px;font-size:16px;border-radius:10px}
+  .bs{padding:10px 16px;font-size:14px}
+  .md{border-radius:16px;align-self:center;margin:auto;max-width:620px}
+  .mo{align-items:center}
+  .mt2{font-size:20px}
+  .fl{font-size:14px}
+  .fi,.fs{font-size:16px;padding:14px 16px}
+  .en{font-size:17px}
+  .ed{font-size:14px}
+  .edes{font-size:15px}
+  .acv{font-size:22px}
+  .acl{font-size:12px}
+  .toast{font-size:16px;padding:14px 28px}
+  .mmi{font-size:17px;padding:18px 22px}
+  .srch{font-size:15px;width:220px;padding:11px 15px}
+  .ihead{padding:24px 22px}
+  .more-menu{min-width:240px;bottom:80px}
+  .pbar2{gap:10px;margin-bottom:18px}
+  .cb{max-width:360px;padding:32px 28px}
+  .cm{font-size:17px}
 }
-/* === LARGE DESKTOP === */
-/* === LARGE DESKTOP === */
+
 /* === LARGE DESKTOP === */
 @media(min-width:1200px){
   body{font-size:18px}
@@ -843,97 +857,6 @@ tr:hover td{background:rgba(13,79,46,.025)}
 </div>
 <div id="root"></div>
 <script>
-// ═══════════════════════════════════════════
-// SYNCHRONISATION GITHUB
-// ═══════════════════════════════════════════
-var GH_TOKEN  = "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";
-var GH_REPO   = "lhoussk67/alkhayr"; // votre repo
-var GH_FILE   = "data.json"; // fichier de données
-var GH_BRANCH = "main";
-// ═══════════════════════════════════════════
-
-var _syncTimer = null;
-var _ghFileSha = ""; // SHA du fichier (requis par GitHub API)
-
-function syncEnabled(){
-  return GH_TOKEN !== "";
-}
-
-function getDataObj(){
-  return {
-    users: users, classes: classes, students: students,
-    attendance: attendance, sanctions: sanctions,
-    schoolYear: schoolYear, events: events,
-    transactions: transactions,
-    savedAt: new Date().toISOString()
-  };
-}
-
-function restoreData(data){
-  if(data.users)      {users=data.users;       sv(getYearKey("users"),users);}
-  if(data.classes)    {classes=data.classes;   sv(getYearKey("classes"),classes);}
-  if(data.students)   {students=data.students; sv(getYearKey("students"),students);}
-  if(data.attendance) {attendance=data.attendance; sv(getYearKey("attendance"),attendance);}
-  if(data.sanctions)  {sanctions=data.sanctions; sv(getYearKey("sanctions"),sanctions);}
-  if(data.schoolYear) {schoolYear=data.schoolYear; sv("schoolYear",schoolYear);}
-  if(data.events)     {events=data.events; sv(getYearKey("events"),events);}
-  if(data.transactions){transactions=data.transactions; sv(getYearKey("transactions"),transactions);}
-}
-
-function loadFromCloud(callback){
-  if(!syncEnabled()){if(callback)callback(false);return;}
-  var url="https://api.github.com/repos/"+GH_REPO+"/contents/"+GH_FILE+"?ref="+GH_BRANCH;
-  var xhr=new XMLHttpRequest();
-  xhr.open("GET",url);
-  xhr.setRequestHeader("Authorization","token "+GH_TOKEN);
-  xhr.setRequestHeader("Accept","application/vnd.github.v3+json");
-  xhr.onload=function(){
-    try{
-      var resp=JSON.parse(xhr.responseText);
-      if(resp.content){
-        _ghFileSha=resp.sha;
-        var decoded=atob(resp.content.replace(/\n/g,""));
-        var data=JSON.parse(decoded);
-        restoreData(data);
-        if(callback)callback(true);
-      } else {
-        if(callback)callback(false);
-      }
-    }catch(e){if(callback)callback(false);}
-  };
-  xhr.onerror=function(){if(callback)callback(false);};
-  xhr.send();
-}
-
-function saveToCloud(){
-  if(!syncEnabled())return;
-  if(_syncTimer)clearTimeout(_syncTimer);
-  _syncTimer=setTimeout(function(){
-    var data=getDataObj();
-    var content=btoa(unescape(encodeURIComponent(JSON.stringify(data,null,2))));
-    var body={message:"Sync données "+new Date().toLocaleDateString(),content:content,branch:GH_BRANCH};
-    if(_ghFileSha)body.sha=_ghFileSha;
-    var xhr=new XMLHttpRequest();
-    xhr.open("PUT","https://api.github.com/repos/"+GH_REPO+"/contents/"+GH_FILE);
-    xhr.setRequestHeader("Authorization","token "+GH_TOKEN);
-    xhr.setRequestHeader("Content-Type","application/json");
-    xhr.setRequestHeader("Accept","application/vnd.github.v3+json");
-    xhr.onload=function(){
-      try{
-        var r=JSON.parse(xhr.responseText);
-        if(r.content&&r.content.sha)_ghFileSha=r.content.sha;
-      }catch(e){}
-      var ind=document.getElementById("sync-ind");
-      if(ind){ind.textContent="\u2601\ufe0f "+new Date().toLocaleTimeString();ind.style.color="#E9C46A";}
-    };
-    xhr.onerror=function(){
-      var ind=document.getElementById("sync-ind");
-      if(ind){ind.textContent="\u26a0\ufe0f Sync erreur";ind.style.color="#C1440E";}
-    };
-    xhr.send(JSON.stringify(body));
-  },2000);
-}
-
 var APP_VERSION="2.0";
 if(ld("appVersion","")!==APP_VERSION){
   localStorage.clear();
@@ -959,13 +882,11 @@ function updateRole(){
 }
 updateRole();
 var DECOR_SRC='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iODAiIHZpZXdCb3g9IjAgMCAyMDAgODAiPjxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDEwMCw0MCkiPjxwb2x5Z29uIHBvaW50cz0iMCwtMjggNywtNyAyOCwwIDcsNyAwLDI4IC03LDcgLTI4LDAgLTcsLTciIGZpbGw9InJnYmEoMjMzLDE5NiwxMDYsMC4yMikiIHN0cm9rZT0iI0U5QzQ2QSIgc3Ryb2tlLXdpZHRoPSIxLjIiLz48cG9seWdvbiBwb2ludHM9IjAsLTI4IDcsLTcgMjgsMCA3LDcgMCwyOCAtNyw3IC0yOCwwIC03LC03IiBmaWxsPSJub25lIiBzdHJva2U9InJnYmEoMjMzLDE5NiwxMDYsMC40NSkiIHN0cm9rZS13aWR0aD0iMC44IiB0cmFuc2Zvcm09InJvdGF0ZSgyMi41KSIvPjxjaXJjbGUgcj0iOSIgZmlsbD0icmdiYSgyMzMsMTk2LDEwNiwwLjE4KSIgc3Ryb2tlPSIjRTlDNDZBIiBzdHJva2Utd2lkdGg9IjEiLz48Y2lyY2xlIHI9IjMuNSIgZmlsbD0iI0U5QzQ2QSIvPjxsaW5lIHgxPSItOTAiIHkxPSIwIiB4Mj0iLTMyIiB5Mj0iMCIgc3Ryb2tlPSJyZ2JhKDIzMywxOTYsMTA2LDAuMzUpIiBzdHJva2Utd2lkdGg9IjAuOCIvPjxsaW5lIHgxPSIzMiIgeTE9IjAiIHgyPSI5MCIgeTI9IjAiIHN0cm9rZT0icmdiYSgyMzMsMTk2LDEwNiwwLjM1KSIgc3Ryb2tlLXdpZHRoPSIwLjgiLz48cG9seWdvbiBwb2ludHM9Ii00NCwwIC0zOCwyLjUgLTMyLDAgLTM4LC0yLjUiIGZpbGw9IiNFOUM0NkEiIG9wYWNpdHk9IjAuNiIvPjxwb2x5Z29uIHBvaW50cz0iNDQsMCAzOCwyLjUgMzIsMCAzOCwtMi41IiBmaWxsPSIjRTlDNDZBIiBvcGFjaXR5PSIwLjYiLz48L2c+PHRleHQgeD0iMTAwIiB5PSIxNiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9IkFtaXJpLHNlcmlmIiBmb250LXNpemU9IjEzIiBmaWxsPSIjRTlDNDZBIiBmb250LXdlaWdodD0iNzAwIiBsZXR0ZXItc3BhY2luZz0iMiI+2KjYs9mFINin2YTZhNmHINin2YTYsdit2YXZhiDYp9mE2LHYrdmK2YU8L3RleHQ+PC9zdmc+';
-// Load cloud config
-GH_TOKEN = ld("gh_token","");
 var LOGO_SRC='data:image/jpeg;base64,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';
 var TFR = {
   dir:"ltr", app:"Association AL-Khair",
   nav:{dashboard:"Accueil",classes:"Classes",students:"Eleves",attendance:"Appel",accounting:"Comptes",discipline:"Discipline",more:"Plus"},
-  more:{users:"Utilisateurs",events:"Evenements",synth:"Suivi eleves",cloud:"Sync Cloud"},
+  more:{users:"Utilisateurs",events:"Evenements",synth:"Suivi eleves"},
   dash:{stu:"Eleves inscrits",cls:"Classes actives",abs:"Absences",bal:"Solde",upev:"Evenements a venir",fin:"Resume financier"},
   cls:{title:"Classes",add:"+ Classe",name:"Nom",tea:"Enseignant",lev:"Niveau",sch:"Horaire",stuc:"Eleves",atit:"Ajouter une classe",etit:"Modifier la classe",sav:"Enregistrer",can:"Annuler",levs:["Debutant","Intermediaire","Avance","Hifz"]},
   stu:{title:"Eleves",add:"+ Eleve",name:"Nom complet",age:"Age",cls:"Classe",pho:"Tel. parent",ema:"Email",sta:"Statut",act:"Actif",ina:"Inactif",atit:"Ajouter un eleve",etit:"Modifier",sav:"Enregistrer",can:"Annuler"},
@@ -1123,17 +1044,7 @@ function doLogin(){
     if(_remCb&&_remCb.checked){localStorage.setItem("rememberedUser",u);localStorage.setItem("rememberedPass",p);}
     else{localStorage.removeItem("rememberedUser");localStorage.removeItem("rememberedPass");}
     document.body.innerHTML="<div id=\"root\"></div>";
-    updateRole();
-    if(syncEnabled()){
-      showSyncLoader("Chargement des donnees...");
-      loadFromCloud(function(ok){
-        hideSyncLoader();
-        render();
-      });
-    } else {
-      render();
-    }
-    return;
+    updateRole();render();return;
   }
   // Check users list
   var found=null;
@@ -1164,18 +1075,10 @@ function logout(){
   showLoginScreen();
 }
 
-function showSyncLoader(msg){
-  document.body.innerHTML='<div style="position:fixed;inset:0;background:linear-gradient(160deg,#071C10,#166534);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:9999"><div style="width:48px;height:48px;border:4px solid rgba(233,196,106,.3);border-top-color:#E9C46A;border-radius:50%;animation:spin 1s linear infinite"></div><div style="color:#E9C46A;font-size:16px;font-weight:700">'+msg+'</div><style>@keyframes spin{to{transform:rotate(360deg)}}</style></div>';
-}
-function hideSyncLoader(){
-  var el=document.getElementById("root");
-  if(!el){document.body.innerHTML='<div id="root"></div>';}
-}
-
 function render(){
   try {
   // Redirect if on forbidden page
-  var _allowedPages={admin:["dashboard","classes","students","attendance","discipline","accounting","users","events","schoolYear","synth","cloudConfig"],director:["dashboard","classes","students","attendance","discipline","accounting","events","synth"],secretary:["dashboard","classes","students","events","synth"],teacher:["dashboard","classes","students","attendance","discipline","synth"],viewer:["dashboard"]};
+  var _allowedPages={admin:["dashboard","classes","students","attendance","discipline","accounting","users","events","schoolYear","synth"],director:["dashboard","classes","students","attendance","discipline","accounting","events","synth"],secretary:["dashboard","classes","students","events","synth"],teacher:["dashboard","classes","students","attendance","discipline","synth"],viewer:["dashboard"]};
   var _allowed=_allowedPages[_role]||["dashboard"];
   if(_allowed.indexOf(page)<0){page="dashboard";}
   var t=tl();
@@ -1198,7 +1101,6 @@ function render(){
   if(_isAdmin){html+='<div class="mmi'+(page==="users"?" on":"")+'" onclick="goto(\'users\');moreOpen=false;render()"><span class="mm-ic">&#128100;</span>'+t.more.users+'</div>';}
   if(_isAdmin||_isDirector||_isSecretary){html+='<div class="mmi'+(page==="events"?" on":"")+'" onclick="goto(\'events\');moreOpen=false;render()"><span class="mm-ic">&#127881;</span>'+t.more.events+'</div>';}
   var _sc2=(page==="synth"?" on":"");var _sm="<div class=\"mmi"+_sc2+"\" onclick=\"gotoSynth()\"><span class=\"mm-ic\">&#128202;</span>"+t.synth.title+"</div>";html+=_sm;
-  var _cc2=(page==="cloudConfig"?" on":"");var _cm="<div class=\"mmi\"+_cc2+\"\" onclick=\"goto('cloudConfig');moreOpen=false;render()\"><span class=\"mm-ic\">&#9729;&#65039;</span>"+t.more.cloud+"</div>";if(_isAdmin)html+=_cm;
   html+='<div class="mmi" onclick="toggleLang()"><span class="mm-ic">&#127760;</span>'+t.com.lang+'</div>';
   if(_isAdmin){html+='<div class="mmi" onclick="openYearModal();moreOpen=false;render()"><span class="mm-ic">&#128197;</span>'+(lang==="ar"?"\u0627\u0644\u0633\u0646\u0629 \u0627\u0644\u062f\u0631\u0627\u0633\u064a\u0629":"Année scolaire")+': '+schoolYear+'</div>';}
   html+='</div>';
@@ -1234,7 +1136,6 @@ function renderPage(){
   if(page==="accounting")return pageAcc();
   if(page==="discipline")return pageDisc();
   if(page==="synth")return pageSynth();
-  if(page==="cloudConfig")return pageCloudConfig();
   return "";
 }
 
@@ -1278,7 +1179,6 @@ function pageDash(){
   // LIGNE 3 : [année scolaire] [décoration] [date]
   h+='<div class="ih-row">';
   h+='<div class="ih-badge"><div><div class="ih-badge-lbl">'+_lYear+'</div><div class="ih-badge-val">'+schoolYear+'</div></div></div>';
-  if(syncEnabled()){h+='<div id="sync-ind" style="font-size:9px;color:rgba(255,255,255,.5);align-self:center;flex-shrink:0">&#9729;&#65039; sync</div>';}
   h+='<div class="ih-decor-center"><img src="'+DECOR_SRC+'" style="width:100%;max-height:52px;object-fit:contain" alt=""></div>';
   h+='<div class="ih-badge" style="text-align:center"><div><div class="ih-badge-lbl">'+_lDate+'</div><div class="ih-badge-val">'+_dd+'/'+_mm+'/'+_yy+'</div></div></div>';
   h+='</div>';
@@ -2054,74 +1954,6 @@ function pageSynth(){
 
 function gotoSynth(){goto('synth');moreOpen=false;render();}
 function addSanctForStu(sid,sname){mdata={studentId:sid,studentName:sname};modal={type:"addDisc"};render();}
-
-function pageCloudConfig(){
-  var h='<div class="card"><div class="ch"><span class="ct">&#9729;&#65039; Synchronisation Cloud</span></div><div style="padding:16px">';
-  h+='<div style="background:#E8F5EE;border-radius:10px;padding:12px 14px;margin-bottom:16px;font-size:13px;line-height:1.8">';
-  h+='<strong>Comment configurer :</strong><br>';
-  h+='1. Aller sur <a href="https://github.com/settings/tokens" target="_blank" style="color:#145A32;font-weight:700">github.com/settings/tokens</a><br>';
-  h+='2. Cliquer <strong>Generate new token (classic)</strong><br>';
-  h+='3. Cocher la case <strong>repo</strong><br>';
-  h+='4. Cliquer <strong>Generate token</strong><br>';
-  h+='5. Copier le token et coller ci-dessous';
-  h+='</div>';
-  h+='<div class="fg"><label class="fl">GitHub Personal Access Token</label>';
-  h+='<input class="fi" id="gh_token" value="'+GH_TOKEN+'" placeholder="ghp_xxxxxxxxxxxx" type="password"></div>';
-  h+='<div style="background:#FFF8E7;border-radius:8px;padding:10px 12px;font-size:12px;color:#92400E;margin-bottom:12px">';
-  h+='&#9888; Le token est sauvegardé uniquement sur cet appareil. Ne le partagez pas.';
-  h+='</div>';
-  h+='<div style="display:flex;gap:8px;margin-top:4px">';
-  h+='<button class="btn bp" style="flex:1" onclick="saveCloudConfig()">&#128190; Sauvegarder</button>';
-  h+='<button class="btn bg2" onclick="testCloudSync()">&#9881; Tester</button>';
-  h+='</div>';
-  h+='<div id="cloud_msg" style="margin-top:10px;font-size:13px;font-weight:600;text-align:center"></div>';
-  if(syncEnabled()){
-    h+='<hr style="margin:16px 0;border-color:var(--cr2)">';
-    h+='<button class="btn bp" style="width:100%;margin-bottom:8px" onclick="forceSyncUp()">&#11014;&#65039; Envoyer vers GitHub</button>';
-    h+='<button class="btn bg2" style="width:100%" onclick="forceSyncDown()">&#11015;&#65039; Recevoir depuis GitHub</button>';
-  }
-  h+='</div></div>';
-  return h;
-}
-
-function saveCloudConfig(){
-  var t=document.getElementById("gh_token").value.trim();
-  GH_TOKEN=t;
-  sv("gh_token",t);
-  var msg=document.getElementById("cloud_msg");
-  if(msg){msg.textContent="\u2705 Token sauvegarde !";msg.style.color="#16A34A";}
-}
-
-function testCloudSync(){
-  var t=document.getElementById("gh_token").value.trim();
-  GH_TOKEN=t;
-  var msg=document.getElementById("cloud_msg");
-  if(msg){msg.textContent="Test en cours...";msg.style.color="#6B6B8A";}
-  loadFromCloud(function(ok){
-    if(msg){
-      msg.textContent=ok?"\u2705 Connexion GitHub reussie !":"\u274C Erreur - verifier le token";
-      msg.style.color=ok?"#16A34A":"#C1440E";
-    }
-  });
-}
-
-function forceSyncUp(){
-  var msg=document.getElementById("cloud_msg");
-  if(msg){msg.textContent="Envoi en cours...";msg.style.color="#6B6B8A";}
-  saveToCloud();
-  setTimeout(function(){
-    if(msg){msg.textContent="\u2705 Donnees envoyees !";msg.style.color="#16A34A";}
-  },2000);
-}
-
-function forceSyncDown(){
-  var msg=document.getElementById("cloud_msg");
-  if(msg){msg.textContent="Chargement en cours...";msg.style.color="#6B6B8A";}
-  loadFromCloud(function(ok){
-    if(ok){render();showToast("\u2705 Donnees mises a jour !");}
-    else{if(msg){msg.textContent="\u274C Erreur de chargement";msg.style.color="#C1440E";}}
-  });
-}
 
 function pSec(btn){
   printSection(btn.getAttribute("data-pt")||"");
