@@ -878,13 +878,14 @@ function getDataObj(){
 }
 
 function restoreData(data){
-  if(data.users)      {users=data.users;       localStorage.setItem(getYearKey("users"),JSON.stringify(users));}
-  if(data.classes)    {classes=data.classes;   localStorage.setItem(getYearKey("classes"),JSON.stringify(classes));}
-  if(data.students)   {students=data.students; localStorage.setItem(getYearKey("students"),JSON.stringify(students));}
-  if(data.attendance) {attendance=data.attendance; localStorage.setItem(getYearKey("attendance"),JSON.stringify(attendance));}
-  if(data.sanctions)  {sanctions=data.sanctions; localStorage.setItem(getYearKey("sanctions"),JSON.stringify(sanctions));}
-  if(data.schoolYear) {schoolYear=data.schoolYear; localStorage.setItem("schoolYear",schoolYear);}
-  if(data.events)     {events=data.events; localStorage.setItem(getYearKey("events"),JSON.stringify(events));}
+  if(data.users)       {users=data.users;        localStorage.setItem("users",JSON.stringify(users));}
+  if(data.classes)     {classes=data.classes;    localStorage.setItem(getYearKey("classes"),JSON.stringify(classes));
+                        if(classes.length>0)attCls=String(classes[0].id);}
+  if(data.students)    {students=data.students;  localStorage.setItem(getYearKey("students"),JSON.stringify(students));}
+  if(data.attendance)  {attendance=data.attendance; localStorage.setItem(getYearKey("attendance"),JSON.stringify(attendance));}
+  if(data.sanctions)   {sanctions=data.sanctions; localStorage.setItem(getYearKey("sanctions"),JSON.stringify(sanctions));}
+  if(data.schoolYear)  {schoolYear=data.schoolYear; localStorage.setItem("schoolYear",schoolYear);}
+  if(data.events)      {events=data.events; localStorage.setItem(getYearKey("events"),JSON.stringify(events));}
   if(data.transactions){transactions=data.transactions; localStorage.setItem(getYearKey("transactions"),JSON.stringify(transactions));}
 }
 
@@ -1144,7 +1145,16 @@ function doLogin(){
     showSyncLoader(lang==="ar"?"\u062c\u0627\u0631\u064a \u062a\u062d\u0645\u064a\u0644 \u0627\u0644\u0628\u064a\u0627\u0646\u0627\u062a...":"Chargement des donnees...");
     loadFromCloud(function(ok){
       hideSyncLoader();
+      if(ok&&classes.length>0)attCls=String(classes[0].id);
       render();
+      // Auto-sync every 60 seconds
+      if(syncEnabled()){
+        setInterval(function(){
+          if(loggedIn&&(Date.now()-_lastLocalChange)>15000){
+            loadFromCloud(function(ok2){if(ok2)render();});
+          }
+        },60000);
+      }
     });
     return;
   }
