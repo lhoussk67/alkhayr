@@ -918,16 +918,15 @@ function saveToCloud(){
   if(!syncEnabled())return;
   if(_syncTimer)clearTimeout(_syncTimer);
   _syncTimer=setTimeout(function(){
-    // Get fresh data from localStorage
     var freshData={
-      users:ld(getYearKey("users"),[]),
-      classes:ld(getYearKey("classes"),[]),
-      students:ld(getYearKey("students"),[]),
-      attendance:ld(getYearKey("attendance"),{}),
-      sanctions:ld(getYearKey("sanctions"),[]),
-      schoolYear:ld("schoolYear",getCurrentYear()),
-      events:ld(getYearKey("events"),[]),
-      transactions:ld(getYearKey("transactions"),[]),
+      users:users,
+      classes:classes,
+      students:students,
+      attendance:attendance,
+      sanctions:sanctions,
+      schoolYear:schoolYear,
+      events:events,
+      transactions:transactions,
       savedAt:new Date().toISOString()
     };
     var xhr=new XMLHttpRequest();
@@ -1544,14 +1543,13 @@ function pageAtt(){
 function tapAtt(key,sid){
   if(!attendance[key])attendance[key]={};
   var cur=attendance[key][sid]||"";
-  // Cycle: none -> absent -> present -> absent_just -> late -> none
   if(cur===""){attendance[key][sid]="absent";}
   else if(cur==="absent"){attendance[key][sid]="present";}
   else if(cur==="present"){attendance[key][sid]="absent_just";}
   else if(cur==="absent_just"){attendance[key][sid]="late";}
   else{delete attendance[key][sid];}
   sv(getYearKey("attendance"),attendance);
-  // Update card without full re-render
+  // Update card visual
   var card=document.getElementById("atc_"+sid);
   if(card){
     var nst=attendance[key][sid]||"";
@@ -1560,6 +1558,29 @@ function tapAtt(key,sid){
     var badge=card.querySelector(".att-badge");
     if(badge)badge.textContent=nst?icons[nst]:"";
   }
+  // Update counters in real time
+  updateAttCounters(key);
+}
+
+function updateAttCounters(key){
+  var rec=attendance[key]||{};
+  var nPr=0,nAb=0,nJt=0,nLa=0;
+  var sids=Object.keys(rec);
+  for(var i=0;i<sids.length;i++){
+    var v=rec[sids[i]];
+    if(v==="present")nPr++;
+    else if(v==="absent")nAb++;
+    else if(v==="absent_just")nJt++;
+    else if(v==="late")nLa++;
+  }
+  var elPr=document.querySelector(".att-sum-n.pr .n");
+  var elAb=document.querySelector(".att-sum-n.ab .n");
+  var elJt=document.querySelector(".att-sum-n.jt .n");
+  var elLa=document.querySelector(".att-sum-n.la .n");
+  if(elPr)elPr.textContent=nPr;
+  if(elAb)elAb.textContent=nAb;
+  if(elJt)elJt.textContent=nJt;
+  if(elLa)elLa.textContent=nLa;
 }
 
 
